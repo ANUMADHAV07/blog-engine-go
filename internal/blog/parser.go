@@ -88,7 +88,7 @@ func (p *Parser) Parse(content []byte, filePath string) (*Post, error) {
 	contentLines := lines[frontnmatterEnd+1:]
 	post.Content = strings.Join(contentLines, "\n")
 
-	post.HTMLContent = p.ConevertToHtml(post.Content)
+	post.HTMLContent = p.ConvertToHtml(post.Content)
 
 	post.ID = p.GenerateID(filePath)
 	post.Slug = p.GenerateSlug(post.Title)
@@ -97,7 +97,7 @@ func (p *Parser) Parse(content []byte, filePath string) (*Post, error) {
 	return post, nil
 }
 
-func (p *Parser) ConevertToHtml(markdownContent string) string {
+func (p *Parser) ConvertToHtml(markdownContent string) string {
 	fmt.Println(markdownContent)
 	extentions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
 	parser := parser.NewWithExtensions(extentions)
