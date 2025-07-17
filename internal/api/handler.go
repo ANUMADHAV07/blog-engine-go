@@ -42,7 +42,7 @@ func (h *Handler) GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) GetPostByID(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 	slug := chi.URLParam(r, "slug")
 
 	if slug == "" {
@@ -63,4 +63,31 @@ func (h *Handler) GetPostByID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
+}
+
+func (h *Handler) GetPostsHandler(w http.ResponseWriter, r *http.Request) {
+
+	posts := h.Manager.GetAllPosts()
+
+	if len(posts) == 0 {
+		http.Error(w, "No posts found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(posts); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *Handler) GetPostCount(w http.ResponseWriter, r *http.Request) {
+	postCount := h.Manager.GetPostCount()
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(postCount); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+
 }
