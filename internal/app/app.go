@@ -14,19 +14,24 @@ type Application struct {
 	Logger  *log.Logger
 	Handler *api.Handler
 	Parser  *blog.Parser
+	Manager *blog.Manager
 }
 
 func NewApplication() (*Application, error) {
 
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
-	handler := api.NewHandler()
+	contentDir := "./content"
+
 	parser := blog.NewParser()
+	manager := blog.NewManager(contentDir)
+	handler := api.NewHandler(manager)
 
 	app := Application{
 		Logger:  logger,
 		Handler: handler,
 		Parser:  parser,
+		Manager: manager,
 	}
 
 	return &app, nil

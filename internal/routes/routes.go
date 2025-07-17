@@ -9,7 +9,7 @@ func SetupRoute(app *app.Application) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Get("/health", app.HealthCheck)
-	// r.Get("/handler",)
+	r.Get("/api/get-post/{slug}", app.Handler.GetPostHandler)
 
 	return r
 }
