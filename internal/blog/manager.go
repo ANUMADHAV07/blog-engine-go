@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -55,7 +56,7 @@ func (m *Manager) LoadAllPostsFromDirectory() error {
 		}
 
 		m.Posts[post.Slug] = post
-		m.Posts[post.ID] = post
+		m.PostById[post.ID] = post
 
 		fmt.Printf("Loaded post: %s (slug: %s)\n", post.Title, post.Slug)
 		return nil
@@ -84,4 +85,79 @@ func (m *Manager) GetPostByID(id string) (*Post, error) {
 		return nil, fmt.Errorf("post with slug '%s' not found", id)
 	}
 	return post, nil
+}
+
+func (m *Manager) GetAllPosts() []*Post {
+	posts := make([]*Post, 0, len(m.Posts))
+
+	for _, post := range m.Posts {
+		posts = append(posts, post)
+	}
+
+	sort.Slice(posts, func(i, j int) bool {
+		return posts[i].Date.After(posts[j].Date)
+	})
+
+	return posts
+}
+
+func (m *Manager) GetPostCount() int {
+	return len(m.Posts)
+}
+
+func (m *Manager) GetPostByTag(tag string) []*Post {
+	var filteredPosts []*Post
+
+	for _, post := range m.Posts {
+		for _, postTag := range post.Tags {
+			if strings.EqualFold(postTag, tag) {
+				filteredPosts = append(filteredPosts, post)
+				break
+			}
+		}
+	}
+	sort.Slice(filteredPosts, func(i, j int) bool {
+		return filteredPosts[i].Date.After(filteredPosts[j].Date)
+	})
+
+	return filteredPosts
+}
+
+func (m *Manager) GetRefreshPosts() error {
+
+	m.Posts = make(map[string]*Post)
+	m.PostById = make(map[string]*Post)
+
+	return m.LoadAllPostsFromDirectory()
+}
+
+func (m *Manager) GetRecentPosts(n int) []*Post {
+
+	allPosts := m.GetAllPosts()
+
+	if n > len(allPosts) {
+		n = len(allPosts)
+	}
+
+	return allPosts[:n]
+}
+
+func (m *Manager) GetAllTags() []string {
+	tagSet := make(map[string]bool)
+
+	for _, post := range m.Posts {
+		for _, tag := range post.Tags {
+			tagSet[tag] = true
+
+		}
+	}
+
+	tags := make([]string, 0, len(tagSet))
+
+	for tag := range tagSet {
+		tags = append(tags, tag)
+	}
+
+	sort.Strings(tags)
+	return tags
 }
